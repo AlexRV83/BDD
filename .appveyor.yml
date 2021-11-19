@@ -1,30 +1,17 @@
-  plugins {
-    id 'java'
-    id "io.freefair.lombok" version "5.2.1"
-  }
+image: Ubuntu  # образ для сборки
 
-    group 'ru.netology'
-    version '1.0-SNAPSHOT'
+stack: jdk 11  # версия JDK
 
-    sourceCompatibility = 1.8
+branches:
+  only:
+    - main
 
-    // кодировка файлов (если используете русский язык в файлах)
-    compileJava.options.encoding = "UTF-8"
-    compileTestJava.options.encoding = "UTF-8"
+build: off  # будем использовать свой скрипт сборки
 
-    repositories {
-    mavenCentral()
-  }
+install:
+  # запускаем SUT (& означает, что в фоновом режиме - не блокируем терминал для запуска тестов)
+  - java -jar ./artifacts/app-ibank-build-for-testers.jar &
 
-    dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.1'
-    testImplementation 'com.codeborne:selenide:5.22.0'
-    testRuntimeOnly 'org.slf4j:slf4j-simple:1.7.30'
-  }
-
-    test {
-    useJUnitPlatform()
-    // в тестах, вызывая `gradlew test -Dselenide.headless=true` будем передавать этот параметр в JVM (где его подтянет Selenide)
-    systemProperty 'selenide.headless', System.getProperty('selenide.headless')
-    systemProperty 'selenide.baseUrl' , System.getProperty('selenide.baseUrl')
-  }
+build_script:
+  - chmod +x gradlew
+  - ./gradlew test --info "-Dselenide.headless=true" "-Dselenide.baseUrl=http://localhost:9999"  # запускаем тест, флаг --info позволяет выводить больше информации
